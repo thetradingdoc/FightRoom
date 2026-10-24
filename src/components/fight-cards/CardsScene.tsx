@@ -17,7 +17,7 @@ export default function CardsScene() {
       <color attach="background" args={["#ffffff"]} />
       <Suspense fallback={null}>
         <ScrollControls pages={4} infinite>
-          <Scene position={[0, 1.5, 0]} />
+          <Scene position={[0, -0.5, 0]} />
         </ScrollControls>
       </Suspense>
     </Canvas>
