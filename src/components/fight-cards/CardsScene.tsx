@@ -102,19 +102,21 @@ function Card({ url, active, hovered, ...props }: CardProps) {
   );
 }
 
+// Shows the main card (UFC 333) by default; switches to the hovered card. Click opens the fight room.
 function ActiveCard({ hovered }: { hovered: number | null }) {
   const ref = useRef<THREE.Mesh>(null!);
   const mat = () => ref.current.material as unknown as { zoom: number; opacity: number };
-  useLayoutEffect(() => void (mat().zoom = 0.8), [hovered]);
+  const shown = hovered ?? 0;
+  useLayoutEffect(() => void (mat().zoom = 0.8), [shown]);
   useFrame((_, delta) => {
     easing.damp(mat(), "zoom", 1, 0.5, delta);
-    easing.damp(mat(), "opacity", Number(hovered !== null), 0.3, delta);
+    easing.damp(mat(), "opacity", 1, 0.3, delta);
   });
-  const card = hovered !== null ? cards[hovered] : null;
+  const card = cards[shown]!;
   return (
     <Billboard>
       <Text fontSize={0.5} position={[2.15, 3.85, 0]} anchorX="left" color="black">
-        {card ? `${card.title}\n${card.headline}` : ""}
+        {`${card.title}\n${card.headline}`}
       </Text>
       <Image
         ref={ref}
@@ -122,7 +124,10 @@ function ActiveCard({ hovered }: { hovered: number | null }) {
         radius={0.3}
         position={[0, 1.5, 0]}
         scale={[3.5, 1.618 * 3.5]}
-        url={imgs[hovered ?? 0]!}
+        url={imgs[shown]!}
+        onClick={(e) => (e.stopPropagation(), go())}
+        onPointerOver={() => (document.body.style.cursor = "pointer")}
+        onPointerOut={() => (document.body.style.cursor = "auto")}
       />
     </Billboard>
   );
