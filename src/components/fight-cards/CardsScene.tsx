@@ -36,10 +36,10 @@ function Scene(props: ThreeElements["group"]) {
   });
   return (
     <group ref={ref} {...props}>
-      <Cards category="Fightroom" offset={0} from={0} len={Math.PI / 4} onHover={hover} />
-      <Cards category="2026" offset={8} from={Math.PI / 4} len={Math.PI / 2} position={[0, 0.4, 0]} onHover={hover} />
-      <Cards category="2025" offset={16} from={Math.PI / 4 + Math.PI / 2} len={Math.PI / 2} onHover={hover} />
-      <Cards category="2024" offset={24} from={Math.PI * 1.25} len={Math.PI * 2 - Math.PI * 1.25} position={[0, -0.4, 0]} onHover={hover} />
+      <Cards category="2026" offset={0} from={0} len={Math.PI / 4} onHover={hover} />
+      <Cards category="2025" offset={8} from={Math.PI / 4} len={Math.PI / 2} position={[0, 0.4, 0]} onHover={hover} />
+      <Cards category="2024" offset={16} from={Math.PI / 4 + Math.PI / 2} len={Math.PI / 2} onHover={hover} />
+      <Cards category="" offset={24} from={Math.PI * 1.25} len={Math.PI * 2 - Math.PI * 1.25} position={[0, -0.4, 0]} onHover={hover} />
       <ActiveCard hovered={hovered} />
     </group>
   );
@@ -60,7 +60,7 @@ function Cards({ category, offset, from = 0, len = Math.PI * 2, radius = 5.25, o
   const textPosition = from + (amount / 2 / amount) * len;
   return (
     <group {...props}>
-      <Billboard position={[Math.sin(textPosition) * radius * 1.4, 0.5, Math.cos(textPosition) * radius * 1.4]}>
+      <Billboard position={[Math.sin(textPosition) * radius * 1.75, 1.1, Math.cos(textPosition) * radius * 1.75]}>
         <Text fontSize={0.25} anchorX="center" color="black">
           {category}
         </Text>
