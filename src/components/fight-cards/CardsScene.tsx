@@ -1,7 +1,7 @@
 // Faithful port of pmndrs/examples "cards" (App.tsx), with UFC posters as images.
 import * as THREE from "three";
 import { Suspense, useLayoutEffect, useRef, useState } from "react";
-import { Canvas, extend, useFrame, type ThreeElements } from "@react-three/fiber";
+import { Canvas, extend, useFrame, useThree, type ThreeElements } from "@react-three/fiber";
 import { Image, ScrollControls, useScroll, Billboard, Text } from "@react-three/drei";
 import { easing, geometry } from "maath";
 import { cards, FIGHT_ROOM_URL } from "./data";
@@ -25,10 +25,11 @@ export default function CardsScene() {
 }
 
 function Scene(props: ThreeElements["group"]) {
-  const ref = useRef<THREE.Group>(null!);
+  const ref = useRef<THREE.Group>(null);
   const scroll = useScroll();
   const [hovered, hover] = useState<number | null>(null);
   useFrame((state, delta) => {
+    if (!ref.current) return;
     ref.current.rotation.y = -scroll.offset * (Math.PI * 2);
     state.events.update?.();
     easing.damp3(state.camera.position, [-state.pointer.x * 2, state.pointer.y * 2 + 4.5, 9], 0.3, delta);
@@ -68,6 +69,8 @@ function Cards({ category, offset, from = 0, len = Math.PI * 2, radius = 5.25, o
       {Array.from({ length: amount - 3 }, (_, i) => {
         const angle = from + (i / amount) * len;
         const idx = (offset + i) % imgs.length;
+         const url = imgs[idx];
+         if (!url) return null;
         return (
           <Card
             key={angle}
@@ -78,7 +81,7 @@ function Cards({ category, offset, from = 0, len = Math.PI * 2, radius = 5.25, o
             rotation={[0, Math.PI / 2 + angle, 0]}
             active={hovered !== null}
             hovered={hovered === i}
-            url={imgs[idx]!}
+            url={url}
           />
         );
       })}
@@ -89,8 +92,9 @@ function Cards({ category, offset, from = 0, len = Math.PI * 2, radius = 5.25, o
 type CardProps = ThreeElements["group"] & { url: string; active: boolean; hovered: boolean };
 
 function Card({ url, active, hovered, ...props }: CardProps) {
-  const ref = useRef<THREE.Mesh>(null!);
+  const ref = useRef<THREE.Mesh>(null);
   useFrame((_, delta) => {
+    if (!ref.current) return;
     const f = hovered ? 1.4 : active ? 1.25 : 1;
     easing.damp3(ref.current.position, [0, hovered ? 0.25 : 0, 0], 0.1, delta);
     easing.damp3(ref.current.scale, [1.85 * f, 1.15 * f, 1], 0.15, delta);
@@ -104,18 +108,26 @@ function Card({ url, active, hovered, ...props }: CardProps) {
 
 // Shows the main card (UFC 333) by default; switches to the hovered card. Click opens the fight room.
 function ActiveCard({ hovered }: { hovered: number | null }) {
-  const ref = useRef<THREE.Mesh>(null!);
-  const mat = () => ref.current.material as unknown as { zoom: number; opacity: number };
+  const ref = useRef<THREE.Mesh>(null);
+  const { width, height } = useThree((state) => state.size);
+  const titleScale = Math.min(1, width / height / 1.2);
+  const mat = () => ref.current?.material as unknown as { zoom: number; opacity: number } | undefined;
   const shown = hovered ?? 0;
-  useLayoutEffect(() => void (mat().zoom = 0.8), [shown]);
+  useLayoutEffect(() => {
+    const material = mat();
+    if (material) material.zoom = 0.8;
+  }, [shown]);
   useFrame((_, delta) => {
-    easing.damp(mat(), "zoom", 1, 0.5, delta);
-    easing.damp(mat(), "opacity", 1, 0.3, delta);
+    const material = mat();
+    if (!material) return;
+    easing.damp(material, "zoom", 1, 0.5, delta);
+    easing.damp(material, "opacity", 1, 0.3, delta);
   });
-  const card = cards[shown]!;
+  const card = cards[shown];
+  if (!card) return null;
   return (
     <Billboard>
-      <Text fontSize={0.5} position={[2.5, 4.25, 0]} anchorX="left" color="black">
+      <Text fontSize={0.5 * titleScale} maxWidth={3 * titleScale} position={[2.5, 4.25, 0]} anchorX="left" color="black">
         {`${card.title}\n${card.headline}`}
       </Text>
       <Image
@@ -124,7 +136,7 @@ function ActiveCard({ hovered }: { hovered: number | null }) {
         radius={0.3}
         position={[0, 1.5, 0]}
         scale={[4.0, 1.618 * 4.0]}
-        url={imgs[shown]!}
+        url={card.image}
         onClick={(e) => (e.stopPropagation(), go())}
         onPointerOver={() => (document.body.style.cursor = "pointer")}
         onPointerOut={() => (document.body.style.cursor = "auto")}
