@@ -21,7 +21,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [hovered, setHovered] = useState<FightCard | null>(null);
-  const active = hovered ?? cards[0];
+  const active = hovered ?? cards[0]!;
   return (
     <main className="relative h-screen w-full overflow-hidden bg-background text-foreground">
       <div className="absolute inset-0">
