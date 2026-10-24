@@ -29,9 +29,6 @@ function Index() {
       </div>
       <div className="pointer-events-none absolute inset-0 text-[13px]">
         <div className="absolute left-10 top-10 flex items-center gap-3">
-          <div className="fr-mark" aria-hidden>
-            <span />
-          </div>
           <div className="leading-none">
             <div className="font-display text-[34px] tracking-[0.06em]">
               FIGHT<span className="fr-accent">ROOM</span>
