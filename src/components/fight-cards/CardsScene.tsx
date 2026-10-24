@@ -36,7 +36,7 @@ function Scene(props: ThreeElements["group"]) {
   });
   return (
     <group ref={ref} {...props}>
-      <Cards category="UFC 333" offset={0} from={0} len={Math.PI / 4} onHover={hover} />
+      <Cards category="Fightroom" offset={0} from={0} len={Math.PI / 4} onHover={hover} />
       <Cards category="2026" offset={8} from={Math.PI / 4} len={Math.PI / 2} position={[0, 0.4, 0]} onHover={hover} />
       <Cards category="2025" offset={16} from={Math.PI / 4 + Math.PI / 2} len={Math.PI / 2} onHover={hover} />
       <Cards category="2024" offset={24} from={Math.PI * 1.25} len={Math.PI * 2 - Math.PI * 1.25} position={[0, -0.4, 0]} onHover={hover} />
