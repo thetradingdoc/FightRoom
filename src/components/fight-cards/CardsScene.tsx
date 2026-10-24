@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { Suspense, useRef, useState } from "react";
 import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
-import { Image, ScrollControls, useScroll, Billboard, Text } from "@react-three/drei";
+import { Image, ScrollControls, useScroll } from "@react-three/drei";
 import { easing } from "maath";
 import { cards, FIGHT_ROOM_URL, type FightCard } from "./data";
 
@@ -43,13 +43,6 @@ function Card({ card, angle, onHover }: { card: FightCard; angle: number; onHove
           window.location.href = FIGHT_ROOM_URL;
         }}
       />
-      {card.live && (
-        <Billboard position={[0, 0.85, 0]}>
-          <Text fontSize={0.16} color="#e5383b" anchorX="center">
-            ● LIVE · UFC 333
-          </Text>
-        </Billboard>
-      )}
     </group>
   );
 }
