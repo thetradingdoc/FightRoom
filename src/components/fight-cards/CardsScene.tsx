@@ -52,11 +52,11 @@ function Rig({ onHover }: { onHover: (c: FightCard | null) => void }) {
   const scroll = useScroll();
   useFrame((state, delta) => {
     group.current.rotation.y = -scroll.offset * Math.PI * 2;
-    easing.damp3(state.camera.position, [-state.pointer.x * 2, state.pointer.y * 1.5 + 4.5, 10], 0.3, delta);
+    easing.damp3(state.camera.position, [-state.pointer.x * 2, state.pointer.y * 1.5 + 5, 19], 0.3, delta);
     state.camera.lookAt(0, 0, 0);
   });
   return (
-    <group ref={group} rotation={[0, 0, 0.12]}>
+    <group ref={group} position={[0, 0.6, 0]} rotation={[0, 0, 0.1]}>
       {cards.map((c, i) => (
         <Card key={c.n} card={c} angle={(i / cards.length) * Math.PI * 2} onHover={onHover} />
       ))}
@@ -66,8 +66,8 @@ function Rig({ onHover }: { onHover: (c: FightCard | null) => void }) {
 
 export default function CardsScene({ onHover }: { onHover: (c: FightCard | null) => void }) {
   return (
-    <Canvas dpr={[1, 1.5]} camera={{ position: [0, 4.5, 10], fov: 22 }}>
-      <fog attach="fog" args={["#0b0b0d", 9, 16]} />
+    <Canvas dpr={[1, 1.5]} camera={{ position: [0, 5, 19], fov: 32 }}>
+      <fog attach="fog" args={["#0b0b0d", 15, 26]} />
       <Suspense fallback={null}>
         <ScrollControls pages={4} infinite>
           <Rig onHover={onHover} />
