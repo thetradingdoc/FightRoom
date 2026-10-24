@@ -1,78 +1,129 @@
+// Faithful port of pmndrs/examples "cards" (App.tsx), with UFC posters as images.
 import * as THREE from "three";
-import { Suspense, useRef, useState } from "react";
-import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
-import { Image, ScrollControls, useScroll } from "@react-three/drei";
-import { easing } from "maath";
-import { cards, FIGHT_ROOM_URL, type FightCard } from "./data";
+import { Suspense, useLayoutEffect, useRef, useState } from "react";
+import { Canvas, extend, useFrame, type ThreeElements } from "@react-three/fiber";
+import { Image, ScrollControls, useScroll, Billboard, Text } from "@react-three/drei";
+import { easing, geometry } from "maath";
+import { cards, FIGHT_ROOM_URL } from "./data";
 
-const RADIUS = 5.2;
+extend(geometry as unknown as Record<string, unknown> as never);
 
-function Card({ card, angle, onHover }: { card: FightCard; angle: number; onHover: (c: FightCard | null) => void }) {
-  const ref = useRef<THREE.Mesh>(null!);
-  const [hovered, setHovered] = useState(false);
-  useFrame((_, delta) => {
-    const s = hovered ? 1.35 : 1;
-    easing.damp3(ref.current.scale, [1.5 * s, 1 * s, 1], 0.15, delta);
-    const m = ref.current.material as unknown as { radius: number; zoom: number };
-    easing.damp(m, "radius", hovered ? 0.2 : 0.08, 0.2, delta);
-    easing.damp(m, "zoom", hovered ? 1 : 1.25, 0.2, delta);
-  });
-  const over = (e: ThreeEvent<PointerEvent>) => {
-    e.stopPropagation();
-    setHovered(true);
-    onHover(card);
-    document.body.style.cursor = "pointer";
-  };
-  const out = () => {
-    setHovered(false);
-    onHover(null);
-    document.body.style.cursor = "auto";
-  };
+const imgs = cards.map((c) => c.image);
+const go = () => (window.location.href = FIGHT_ROOM_URL);
+
+export default function CardsScene() {
   return (
-    <group position={[Math.sin(angle) * RADIUS, 0, Math.cos(angle) * RADIUS]} rotation={[0, angle + Math.PI / 2, 0]}>
-      <Image
-        ref={ref}
-        url={card.image}
-        transparent
-        radius={0.08}
-        side={THREE.DoubleSide}
-        onPointerOver={over}
-        onPointerOut={out}
-        onClick={(e) => {
-          e.stopPropagation();
-          window.location.href = FIGHT_ROOM_URL;
-        }}
-      />
-    </group>
-  );
-}
-
-function Rig({ onHover }: { onHover: (c: FightCard | null) => void }) {
-  const group = useRef<THREE.Group>(null!);
-  const scroll = useScroll();
-  useFrame((state, delta) => {
-    group.current.rotation.y = -scroll.offset * Math.PI * 2;
-    easing.damp3(state.camera.position, [-state.pointer.x * 2, state.pointer.y * 1.5 + 5, 19], 0.3, delta);
-    state.camera.lookAt(0, 0, 0);
-  });
-  return (
-    <group ref={group} position={[0, 0.6, 0]} rotation={[0, 0, 0.1]}>
-      {cards.map((c, i) => (
-        <Card key={c.n} card={c} angle={(i / cards.length) * Math.PI * 2} onHover={onHover} />
-      ))}
-    </group>
-  );
-}
-
-export default function CardsScene({ onHover }: { onHover: (c: FightCard | null) => void }) {
-  return (
-    <Canvas dpr={[1, 1.5]} camera={{ position: [0, 5, 19], fov: 32 }}>
-      <fog attach="fog" args={["#0b0b0d", 15, 26]} />
+    <Canvas dpr={[1, 1.5]}>
+      <color attach="background" args={["#ffffff"]} />
       <Suspense fallback={null}>
         <ScrollControls pages={4} infinite>
-          <Rig onHover={onHover} />
+          <Scene position={[0, 1.5, 0]} />
         </ScrollControls>
       </Suspense>
     </Canvas>
+  );
+}
+
+function Scene(props: ThreeElements["group"]) {
+  const ref = useRef<THREE.Group>(null!);
+  const scroll = useScroll();
+  const [hovered, hover] = useState<number | null>(null);
+  useFrame((state, delta) => {
+    ref.current.rotation.y = -scroll.offset * (Math.PI * 2);
+    state.events.update?.();
+    easing.damp3(state.camera.position, [-state.pointer.x * 2, state.pointer.y * 2 + 4.5, 9], 0.3, delta);
+    state.camera.lookAt(0, 0, 0);
+  });
+  return (
+    <group ref={ref} {...props}>
+      <Cards category="UFC 333" offset={0} from={0} len={Math.PI / 4} onHover={hover} />
+      <Cards category="2026" offset={8} from={Math.PI / 4} len={Math.PI / 2} position={[0, 0.4, 0]} onHover={hover} />
+      <Cards category="2025" offset={16} from={Math.PI / 4 + Math.PI / 2} len={Math.PI / 2} onHover={hover} />
+      <Cards category="2024" offset={24} from={Math.PI * 1.25} len={Math.PI * 2 - Math.PI * 1.25} position={[0, -0.4, 0]} onHover={hover} />
+      <ActiveCard hovered={hovered} />
+    </group>
+  );
+}
+
+type CardsProps = ThreeElements["group"] & {
+  category: string;
+  offset: number;
+  from?: number;
+  len?: number;
+  radius?: number;
+  onHover: (i: number | null) => void;
+};
+
+function Cards({ category, offset, from = 0, len = Math.PI * 2, radius = 5.25, onHover, ...props }: CardsProps) {
+  const [hovered, hover] = useState<number | null>(null);
+  const amount = Math.round(len * 22);
+  const textPosition = from + (amount / 2 / amount) * len;
+  return (
+    <group {...props}>
+      <Billboard position={[Math.sin(textPosition) * radius * 1.4, 0.5, Math.cos(textPosition) * radius * 1.4]}>
+        <Text fontSize={0.25} anchorX="center" color="black">
+          {category}
+        </Text>
+      </Billboard>
+      {Array.from({ length: amount - 3 }, (_, i) => {
+        const angle = from + (i / amount) * len;
+        const idx = (offset + i) % imgs.length;
+        return (
+          <Card
+            key={angle}
+            onPointerOver={(e) => (e.stopPropagation(), hover(i), onHover(idx))}
+            onPointerOut={() => (hover(null), onHover(null))}
+            onClick={(e) => (e.stopPropagation(), go())}
+            position={[Math.sin(angle) * radius, 0, Math.cos(angle) * radius]}
+            rotation={[0, Math.PI / 2 + angle, 0]}
+            active={hovered !== null}
+            hovered={hovered === i}
+            url={imgs[idx]!}
+          />
+        );
+      })}
+    </group>
+  );
+}
+
+type CardProps = ThreeElements["group"] & { url: string; active: boolean; hovered: boolean };
+
+function Card({ url, active, hovered, ...props }: CardProps) {
+  const ref = useRef<THREE.Mesh>(null!);
+  useFrame((_, delta) => {
+    const f = hovered ? 1.4 : active ? 1.25 : 1;
+    easing.damp3(ref.current.position, [0, hovered ? 0.25 : 0, 0], 0.1, delta);
+    easing.damp3(ref.current.scale, [1.618 * f, 1 * f, 1], 0.15, delta);
+  });
+  return (
+    <group {...props}>
+      <Image ref={ref} transparent radius={0.075} url={url} scale={[1.618, 1]} side={THREE.DoubleSide} />
+    </group>
+  );
+}
+
+function ActiveCard({ hovered }: { hovered: number | null }) {
+  const ref = useRef<THREE.Mesh>(null!);
+  const mat = () => ref.current.material as unknown as { zoom: number; opacity: number };
+  useLayoutEffect(() => void (mat().zoom = 0.8), [hovered]);
+  useFrame((_, delta) => {
+    easing.damp(mat(), "zoom", 1, 0.5, delta);
+    easing.damp(mat(), "opacity", Number(hovered !== null), 0.3, delta);
+  });
+  const card = hovered !== null ? cards[hovered] : null;
+  return (
+    <Billboard>
+      <Text fontSize={0.5} position={[2.15, 3.85, 0]} anchorX="left" color="black">
+        {card ? `${card.title}\n${card.headline}` : ""}
+      </Text>
+      <Image
+        ref={ref}
+        transparent
+        radius={0.3}
+        position={[0, 1.5, 0]}
+        scale={[3.5, 1.618 * 3.5]}
+        url={imgs[hovered ?? 0]!}
+      />
+    </Billboard>
   );
 }
