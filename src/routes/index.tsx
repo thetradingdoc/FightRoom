@@ -1,6 +1,5 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
-import { FIGHT_ROOM_URL } from "@/components/fight-cards/data";
 
 const CardsScene = lazy(() => import("@/components/fight-cards/CardsScene"));
 
@@ -34,9 +33,6 @@ function Index() {
           <br />
           Automated MMA &amp; UFC Trading platform
         </div>
-        <a href={FIGHT_ROOM_URL} className="pointer-events-auto absolute bottom-10 left-10">
-          Volkanivski vs elvoev →
-        </a>
       </div>
     </main>
   );
