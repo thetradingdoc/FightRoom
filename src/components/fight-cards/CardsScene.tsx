@@ -17,7 +17,7 @@ export default function CardsScene() {
       <color attach="background" args={["#ffffff"]} />
       <Suspense fallback={null}>
         <ScrollControls pages={4} infinite>
-          <Scene position={[0, -0.5, 0]} />
+          <Scene position={[0, -0.9, 0]} />
         </ScrollControls>
       </Suspense>
     </Canvas>
@@ -93,11 +93,11 @@ function Card({ url, active, hovered, ...props }: CardProps) {
   useFrame((_, delta) => {
     const f = hovered ? 1.4 : active ? 1.25 : 1;
     easing.damp3(ref.current.position, [0, hovered ? 0.25 : 0, 0], 0.1, delta);
-    easing.damp3(ref.current.scale, [1.618 * f, 1 * f, 1], 0.15, delta);
+    easing.damp3(ref.current.scale, [1.85 * f, 1.15 * f, 1], 0.15, delta);
   });
   return (
     <group {...props}>
-      <Image ref={ref} transparent radius={0.075} url={url} scale={[1.618, 1]} side={THREE.DoubleSide} />
+      <Image ref={ref} transparent radius={0.075} url={url} scale={[1.85, 1.15]} side={THREE.DoubleSide} />
     </group>
   );
 }
@@ -115,7 +115,7 @@ function ActiveCard({ hovered }: { hovered: number | null }) {
   const card = cards[shown]!;
   return (
     <Billboard>
-      <Text fontSize={0.5} position={[2.15, 3.85, 0]} anchorX="left" color="black">
+      <Text fontSize={0.5} position={[2.5, 4.25, 0]} anchorX="left" color="black">
         {`${card.title}\n${card.headline}`}
       </Text>
       <Image
@@ -123,7 +123,7 @@ function ActiveCard({ hovered }: { hovered: number | null }) {
         transparent
         radius={0.3}
         position={[0, 1.5, 0]}
-        scale={[3.5, 1.618 * 3.5]}
+        scale={[4.0, 1.618 * 4.0]}
         url={imgs[shown]!}
         onClick={(e) => (e.stopPropagation(), go())}
         onPointerOver={() => (document.body.style.cursor = "pointer")}
