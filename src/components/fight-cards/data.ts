@@ -1,5 +1,6 @@
 // Official event art downloaded from ufc.com/event/ufc-NNN into /public/ufc.
-export const FIGHT_ROOM_URL = "http://127.0.0.1:8765/trading/fightlens.html#fight-room";
+export const TRAADE_RESEARCH_URL =
+  "http://127.0.0.1:8765/trading/fightlens.html?v=20261024-date-fallback#fight-room";
 
 const events: [number, string][] = [
   [333, "Volkanovski vs Evloev"],
@@ -38,7 +39,15 @@ const events: [number, string][] = [
   [300, "Pereira vs Hill"],
 ];
 
-export type FightCard = { n: number; title: string; headline: string; image: string; live: boolean };
+export type FightCard = {
+  n: number;
+  title: string;
+  headline: string;
+  image: string;
+  live: boolean;
+  eventSlug?: string;
+  researchDay?: string | null;
+};
 
 export const cards: FightCard[] = events.map(([n, headline]) => ({
   n,
